@@ -1,3 +1,16 @@
+/* RRVerificationController.h
+ *
+ *  Created by Evan Schoenberg on 7/20/12.
+ *  Copyright 2012 Regular Rate and Rhythm Software. No rights reserved.
+ *
+ * Completed and fleshed out implementation of Apple's VerificationController, the Companion File to
+ * TP40012484 ("In-App Purchase Receipt Validation on iOS" -  bit.ly/QiosJw)
+ *
+ * Public domain. Feel free to give me credit or send brownies if you'd like.
+ *
+ *  See README.md for implementation notes
+ */
+
 #import <Foundation/Foundation.h>
 #import <StoreKit/StoreKit.h>
 
@@ -15,7 +28,24 @@
 @class RRTransactionVerifier;
 
 @protocol RRVerificationControllerDelegate
+/*!
+ * @brief Verification with Apple's server completed successfully
+ *
+ * @param transaction The transaction being verified
+ * @param isValid YES if Apple reported the transaction was valid; NO if Apple said it was not valid or if the server's validation reply was inconsistent with validity
+ */
 - (void)verificationControllerDidVerifyPurchase:(SKPaymentTransaction *)transaction isValid:(BOOL)isValid;
+
+
+ /*!
+  * @brief The attempt at verification could not be completed
+  *
+  * This does not mean that Apple reported the transaction was invalid, but
+  * rather indicates a communication failure, a server error, or the like.
+  *
+  * @param transaction The transaction being verified
+  * @param error An NSError describing the error. May be nil if the cause of the error was unknown (or if nobody has written code to report an NSError for that failure...)
+  */
 - (void)verificationControllerDidFailToVerifyPurchase:(SKPaymentTransaction *)transaction error:(NSError *)error;
 @end
 
@@ -46,72 +76,5 @@
 
 @interface RRVerificationController (ForTransactionVerifierOnly)
 - (void)transactionVerifier:(RRTransactionVerifier *)verifier didDetermineValidity:(BOOL)isValid;
-- (void)transactionVerifier:(RRTransactionVerifier *)verifier didFailWithError:(NSError *)error;
+- (void)verificationControllerDidFailToVerifyPurchase:(SKPaymentTransaction *)transaction error:(NSError *)error;
 @end
-
-
-/*
- The calling implementation looks something like:
- 
- #define MY_SHARED_SECRET	@"1234567890 abcdef1234 567890abcd ef"
- 
-- (void)paymentQueue:(id)queue updatedTransactions:(NSArray *)transactions
-{
-	[RRVerificationController sharedInstance].itcContentProviderSharedSecret = MY_SHARED_SECRET;
- 
-	for (SKPaymentTransaction *transaction in transactions)
-	{
-		switch ([transaction transactionState])
-		{
-			case SKPaymentTransactionStatePurchasing:
-				break;
-			case SKPaymentTransactionStatePurchased:
-				if ([[RRVerificationController sharedInstance] verifyPurchase:transaction
-																 withDelegate:self
-																		error:NULL] == FALSE) {
-					[self failedTransaction:transaction];
-				}
-				break;
-			case SKPaymentTransactionStateFailed:
-				[self failedTransaction:transaction];
-				break;
-			case SKPaymentTransactionStateRestored:
-				if ([[RRVerificationController sharedInstance] verifyPurchase:transaction
-																 withDelegate:self
-																		error:NULL] == FALSE) {
-					[self failedTransaction:transaction];
-				}
-			default:
-				break;
-		}
-	}
-}
-*/
-
-/*
- The delegate implementation looks something like:
-
- - (void)verificationControllerDidVerifyPurchase:(SKPaymentTransaction *)transaction isValid:(BOOL)isValid
- {
-	if (isValid)
-		[self performUpgrade];
-	else
-		[self displayFailureMessage];
- }
- 
- - (void)verificationControllerDidFailToVerifyPurchase:(SKPaymentTransaction *)transaction error:(NSError *)error
- {
-	NSString *message = NSLocalizedString(@"Your purchase could not be verified with Apple's servers. Please try again later.", nil);
-	if (error) {
-		message = [message stringByAppendingString:@"\n\n"];
-		message = [message stringByAppendingFormat:NSLocalizedString(@"The error was: %@.", nil), error.localizedDescription];
-	}
- 
-	[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Purchase Verification Failed", nil)
-		message:message
-		delegate:nil
-		cancelButtonTitle:NSLocalizedString(@"Dismiss", nil)
-		otherButtonTitles:nil] show];
- }
- */
-
