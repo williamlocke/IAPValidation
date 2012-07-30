@@ -7,6 +7,8 @@
  * TP40012484 ("In-App Purchase Receipt Validation on iOS" -  bit.ly/QiosJw)
  *
  * Public domain. Feel free to give me credit or send brownies if you'd like.
+ *
+ *  See README.md for implementation notes
  */
 
 #if ! __has_feature(objc_arc)
