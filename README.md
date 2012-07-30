@@ -55,6 +55,12 @@ You'll need your iTunes Connect In App Purchase Shared Secret, which you can fin
 RRVerificationControllerDelegate is implemented like so:
 
 ```
+/*!
+ * @brief Verification with Apple's server completed successfully
+ *
+ * @param transaction The transaction being verified
+ * @param isValid YES if Apple reported the transaction was valid; NO if Apple said it was not valid or if the server's validation reply was inconsistent with validity
+ */
  - (void)verificationControllerDidVerifyPurchase:(SKPaymentTransaction *)transaction isValid:(BOOL)isValid
  {
 	if (isValid)
@@ -66,6 +72,15 @@ RRVerificationControllerDelegate is implemented like so:
 		[[SKPaymentQueue defaultQueue] finishTransaction:transaction];
  }
  
+ /*!
+  * @brief The attempt at verification could not be completed
+  *
+  * This does not mean that Apple reported the transaction was invalid, but
+  * rather indicates a communication failure, a server error, or the like.
+  *
+  * @param transaction The transaction being verified
+  * @param error An NSError describing the error. May be nil if the cause of the error was unknown (or if nobody has written code to report an NSError for that failure...)
+  */
  - (void)verificationControllerDidFailToVerifyPurchase:(SKPaymentTransaction *)transaction error:(NSError *)error
  {
 	NSString *message = NSLocalizedString(@"Your purchase could not be verified with Apple's servers. Please try again later.", nil);
