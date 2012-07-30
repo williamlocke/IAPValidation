@@ -55,6 +55,18 @@ You'll need your iTunes Connect In App Purchase Shared Secret, which you can fin
 RRVerificationControllerDelegate is implemented like so:
 
 ```
+- (void)completeTransaction:(SKPaymentTransaction *)transaction 
+{
+ /* Handled a completed and verified new transcation */
+}
+
+- (void)restoreTransaction:(SKPaymentTransaction *)transaction 
+{
+ /* Handled a completed and verified restored transcation.
+  * For many use cases this is simply [self completeTransaction:transaction]
+  */
+}
+
 /*!
  * @brief Verification with Apple's server completed successfully
  *
@@ -63,9 +75,18 @@ RRVerificationControllerDelegate is implemented like so:
  */
  - (void)verificationControllerDidVerifyPurchase:(SKPaymentTransaction *)transaction isValid:(BOOL)isValid
  {
-	if (isValid)
-		[self performUpgrade];
-	else
+ 	if (isValid) {
+       switch (transaction.transactionState) {
+            case SKPaymentTransactionStatePurchased:
+                [self completeTransaction:transaction];
+                break;
+            case SKPaymentTransactionStateRestored:
+                [self restoreTransaction:transaction];
+            default:
+                break;
+        }
+
+    } else
 		[self displayFailureMessage];
 		
 	if (transaction.transactionState != SKPaymentTransactionStatePurchasing)
