@@ -97,7 +97,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     NSString *transactionPurchaseInfo = [receiptDict objectForKey:@"purchase-info"];
     NSString *decodedPurchaseInfo   = [self decodeBase64:transactionPurchaseInfo];
     NSDictionary *purchaseInfoDict  = [[decodedPurchaseInfo dataUsingEncoding:NSUTF8StringEncoding] rr_dictionaryFromPlistDataWithError:&error];
-	if (!receiptDict) {
+	if (!purchaseInfoDict) {
 		if (outError) *outError = error;
 		return NO;
 	}
