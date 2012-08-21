@@ -14,7 +14,7 @@ This example assumes that your `SKPaymentTransactionObserver` conformant class w
 
 You'll need your iTunes Connect In App Purchase Shared Secret, which you can find/generate via **iTunes Connect -> Manage Apps -> your app -> Manage In App Purchases**.
 
-```
+```objective-c
  #define MY_SHARED_SECRET	@"1234567890abcdef1234567890abcdef"
  
 - (void)paymentQueue:(id)queue updatedTransactions:(NSArray *)transactions
@@ -54,7 +54,7 @@ You'll need your iTunes Connect In App Purchase Shared Secret, which you can fin
 
 RRVerificationControllerDelegate is implemented like so:
 
-```
+```objective-c
 - (void)completeTransaction:(SKPaymentTransaction *)transaction 
 {
  /* Handled a completed and verified new transcation */
