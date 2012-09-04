@@ -26,7 +26,12 @@
 
 - (NSDictionary *)rr_dictionaryFromJSONDataWithError:(out NSError **)outError
 {
-    NSDictionary *dictionaryParsed = [NSJSONSerialization JSONObjectWithData:self
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_5_0
+	#define NSJSONSerializationClass NSClassFromString(@"NSJSONSerialization")
+#else
+	#define NSJSONSerializationClass NSJSONSerialization
+#endif
+    NSDictionary *dictionaryParsed = [NSJSONSerializationClass JSONObjectWithData:self
                                                                      options:0
                                                                        error:outError];
     return dictionaryParsed;

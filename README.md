@@ -7,6 +7,10 @@ Apple's VerificationController requires making a number of changes within the co
 
 It's in the public domain with USE_CODE_REQUIRING_ATTRIBUTION not defined in RRBase64Manager. If it *is* defined, which is the default, a more efficient base64 implementation which does require attribution will be used; see that file for details.
 
+iOS 5.x is required.  On iOS 4, all purchases will validate (just as if you weren't using the class at all).  Also, but sure to add linker flags "-fobjc-arc -weak-lSystem.B -weaklobjc" to avoid crashing with ARC enabled for the file when run on iOS 4. 
+
+The iOS 5 requirement is only because of the use of NSJSONSerialization; patches to replace NSJSONSerialization with an iOS 4 compatibility implementation (in NSData+RRTransactionParsingAdditions) are welcome.
+
 Use
 --------
 

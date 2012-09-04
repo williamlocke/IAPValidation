@@ -76,5 +76,5 @@
 
 @interface RRVerificationController (ForTransactionVerifierOnly)
 - (void)transactionVerifier:(RRTransactionVerifier *)verifier didDetermineValidity:(BOOL)isValid;
--- (void)transactionVerifier:(RRTransactionVerifier *)verifier didFailWithError:(NSError *)error;
+- (void)transactionVerifier:(RRTransactionVerifier *)verifier didFailWithError:(NSError *)error;
 @end

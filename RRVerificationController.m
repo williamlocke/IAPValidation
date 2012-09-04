@@ -44,6 +44,8 @@
 
 #pragma mark Receipt Verification
 
+#define RR_SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
+
 // This method should be called once a transaction gets to the SKPaymentTransactionStatePurchased or SKPaymentTransactionStateRestored state
 - (BOOL)verifyPurchase:(SKPaymentTransaction *)transaction withDelegate:(NSObject<RRVerificationControllerDelegate> *)verificationDelegate error:(out NSError **)outError;
 {
@@ -51,7 +53,14 @@
 		RRTransactionVerifier *verifier = [[RRTransactionVerifier alloc] initWithPurchase:transaction delegate:verificationDelegate controller:self];
 		[verificationsInProgress addObject:verifier];
 		
-		return [verifier beginVerificationWithError:outError];
+		if (RR_SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"5.0")) {
+			return [verifier beginVerificationWithError:outError];
+		} else {
+			/* On iOS < 5.0, simply reply that the transaction is valid on the next run loop */
+			[self performSelector:@selector(returnValidForVerifier:) withObject:verifier afterDelay:0];
+			return YES;
+		}
+
 	} else {
 		/* Transaction wasn't in a state in which it can possibly be valid */
 		if (outError)
@@ -66,6 +75,10 @@
 	[verificationsInProgress removeObject:verifier];
 }
 
+- (void)returnValidForVerifier:(RRTransactionVerifier *)verifier
+{
+	[self transactionVerifier:verifier didDetermineValidity:YES];
+}
 
 - (void)transactionVerifier:(RRTransactionVerifier *)verifier didFailWithError:(NSError *)error
 {
