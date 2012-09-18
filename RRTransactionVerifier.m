@@ -54,7 +54,6 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     }
     
     // The transaction looks ok, so start the verify process.
-    NSLog(@"BEGIN WITH %@", self.isSandboxTransaction ? @"SANDBOX" : @"NO SANDBOX");
     // Encode the receiptData for the itms receipt verification POST request.
     NSString *jsonObjectString = [self encodeBase64:(uint8_t *)transaction.transactionReceipt.bytes length:transaction.transactionReceipt.length];
 	    
@@ -379,7 +378,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     
         if (error.code == ERROR_SANDBOX_RECEIPT_IN_PROD && !self.sandboxTransaction) 
         {
-            NSLog(@"SANDBOX ERROR, RETRYING");
+
             self.sandboxTransaction = YES;
             
             if (![self beginVerificationWithError:&error])
@@ -394,13 +393,13 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
             
             
         } else {
-            NSLog(@"FAIL");
+
             [self.controller transactionVerifier:self didFailWithError:error];
             
         }
         
     } else
-    { NSLog(@"SUCCESS");
+    { 
 		[self.controller transactionVerifier:self didDetermineValidity:isOk];
     }
     
