@@ -13,8 +13,12 @@
 @interface RRTransactionVerifier : NSObject
 {
 	SKPaymentTransaction *transaction;
+    BOOL sandboxTransaction;
 }
 
+#define ERROR_SANDBOX_RECEIPT_IN_PROD   31415
+
+@property (nonatomic, assign, getter=isSandboxTransaction) BOOL sandboxTransaction;
 @property (nonatomic, strong) SKPaymentTransaction *transaction;
 @property (nonatomic, assign) NSObject<RRVerificationControllerDelegate> *delegate;
 @property (nonatomic, assign) RRVerificationController *controller;
