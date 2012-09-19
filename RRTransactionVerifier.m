@@ -27,6 +27,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
 @synthesize transaction, delegate, controller;
 @synthesize originalPurchaseInfoDict;
 @synthesize receivedData;
+@synthesize sandboxTransaction;
 
 - (id)initWithPurchase:(SKPaymentTransaction *)inTransaction delegate:(NSObject<RRVerificationControllerDelegate> *)inVerificationDelegate controller:(RRVerificationController *)inController
 {
@@ -34,6 +35,10 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
 		self.transaction = inTransaction;
 		self.delegate = inVerificationDelegate;
 		self.controller = inController;
+        
+        // first check with production server
+        self.sandboxTransaction = NO;
+        
 	}
 	
 	return self;
@@ -49,7 +54,6 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     }
     
     // The transaction looks ok, so start the verify process.
-    
     // Encode the receiptData for the itms receipt verification POST request.
     NSString *jsonObjectString = [self encodeBase64:(uint8_t *)transaction.transactionReceipt.bytes length:transaction.transactionReceipt.length];
 	    
@@ -59,7 +63,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
 
     NSData *payloadData = [payload dataUsingEncoding:NSUTF8StringEncoding];
     
-    NSString *serverURL = ITMS_ACTIVE_VERIFY_RECEIPT_URL;
+    NSString *serverURL = self.isSandboxTransaction ? ITMS_SANDBOX_VERIFY_RECEIPT_URL : ITMS_PROD_VERIFY_RECEIPT_URL;
     
     // Create the POST request to the server.
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:serverURL]];
@@ -71,7 +75,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     [conn start];
     
     // The transation receipt has not been validated yet.  That is done from the NSURLConnection callback.
-    return isOk;
+    return YES;
 }
 
 
@@ -90,7 +94,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
 	NSError *error;
     NSDictionary *receiptDict = [transaction.transactionReceipt rr_dictionaryFromPlistDataWithError:&error];
 	if (!receiptDict) {
-		if (outError) *outError = error;
+		if (error) *outError = error;
 		return NO;
 	}
 	
@@ -98,7 +102,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     NSString *decodedPurchaseInfo   = [self decodeBase64:transactionPurchaseInfo];
     NSDictionary *purchaseInfoDict  = [[decodedPurchaseInfo dataUsingEncoding:NSUTF8StringEncoding] rr_dictionaryFromPlistDataWithError:&error];
 	if (!purchaseInfoDict) {
-		if (outError) *outError = error;
+		if (error) *outError = error;
 		return NO;
 	}
 
@@ -136,10 +140,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     {
         return NO;
     }
-    
-    // Make a note of the fact that we've seen the transaction id already
-    [self saveTransactionId:transactionId];
-    
+        
     // Save the transaction receipt's purchaseInfo in the transactionsReceiptStorageDictionary.
 	self.originalPurchaseInfoDict = purchaseInfoDict;
     
@@ -237,7 +238,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
 	NSError *error;
     NSDictionary *verifiedReceiptDictionary = [[receiptString dataUsingEncoding:NSUTF8StringEncoding] rr_dictionaryFromJSONDataWithError:&error];
     if (!verifiedReceiptDictionary) {
-		if (outError) *outError = error;
+		if (error) *outError = error;
 		return NO;
 	}
 
@@ -248,6 +249,16 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
         return NO;
     }
     int verifyReceiptStatus = [status integerValue];
+    
+    // 21007 = sandbox receipt tried to verify with production server
+    if (21007 == verifyReceiptStatus) 
+    {
+        
+        *outError = [NSError errorWithDomain:@"com.davedelong.myproject" code:ERROR_SANDBOX_RECEIPT_IN_PROD userInfo:nil];
+        return NO;
+        
+    }
+
     // 21006 = This receipt is valid but the subscription has expired.
     if (0 != verifyReceiptStatus && 21006 != verifyReceiptStatus)
     {
@@ -363,9 +374,39 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
 	BOOL isOk = [self doesTransactionInfoMatchReceipt:responseString error:&error];
 	
 	if (error)
-		[self.controller transactionVerifier:self didFailWithError:error];
-	else
+    {
+    
+        if (error.code == ERROR_SANDBOX_RECEIPT_IN_PROD && !self.sandboxTransaction) 
+        {
+
+            self.sandboxTransaction = YES;
+            
+            if (![self beginVerificationWithError:&error])
+            {
+                [self.controller transactionVerifier:self didFailWithError:error];
+            } else {
+                
+                return; // only in this case, do not save the transactionId
+                // since we will be validating this one again in the sandbox
+                
+            }
+            
+            
+        } else {
+
+            [self.controller transactionVerifier:self didFailWithError:error];
+            
+        }
+        
+    } else
+    { 
 		[self.controller transactionVerifier:self didDetermineValidity:isOk];
+    }
+    
+    // Make a note of the fact that we've seen the transaction id already
+    [self saveTransactionId:self.transaction.transactionIdentifier];
+    
+
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error

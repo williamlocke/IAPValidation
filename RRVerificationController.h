@@ -15,7 +15,7 @@
 #import <StoreKit/StoreKit.h>
 
 #define ITMS_PROD_VERIFY_RECEIPT_URL        @"https://buy.itunes.apple.com/verifyReceipt"
-#define ITMS_SANDBOX_VERIFY_RECEIPT_URL     @"https://sandbox.itunes.apple.com/verifyReceipt";
+#define ITMS_SANDBOX_VERIFY_RECEIPT_URL     @"https://sandbox.itunes.apple.com/verifyReceipt"
 
 #ifdef DEBUG_BUILD
 	// Use ITMS_SANDBOX_VERIFY_RECEIPT_URL while testing against the sandbox.
