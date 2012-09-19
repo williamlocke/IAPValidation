@@ -94,7 +94,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
 	NSError *error;
     NSDictionary *receiptDict = [transaction.transactionReceipt rr_dictionaryFromPlistDataWithError:&error];
 	if (!receiptDict) {
-		if (error) *outError = error;
+		if (outError) *outError = error;
 		return NO;
 	}
 	
@@ -102,7 +102,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     NSString *decodedPurchaseInfo   = [self decodeBase64:transactionPurchaseInfo];
     NSDictionary *purchaseInfoDict  = [[decodedPurchaseInfo dataUsingEncoding:NSUTF8StringEncoding] rr_dictionaryFromPlistDataWithError:&error];
 	if (!purchaseInfoDict) {
-		if (error) *outError = error;
+		if (outError) *outError = error;
 		return NO;
 	}
 
@@ -238,7 +238,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
 	NSError *error;
     NSDictionary *verifiedReceiptDictionary = [[receiptString dataUsingEncoding:NSUTF8StringEncoding] rr_dictionaryFromJSONDataWithError:&error];
     if (!verifiedReceiptDictionary) {
-		if (error) *outError = error;
+		if (outError) *outError = error;
 		return NO;
 	}
 
@@ -253,8 +253,8 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     // 21007 = sandbox receipt tried to verify with production server
     if (21007 == verifyReceiptStatus) 
     {
-        
-        *outError = [NSError errorWithDomain:@"com.davedelong.myproject" code:ERROR_SANDBOX_RECEIPT_IN_PROD userInfo:nil];
+        if (outError)
+			*outError = [NSError errorWithDomain:@"com.davedelong.myproject" code:ERROR_SANDBOX_RECEIPT_IN_PROD userInfo:nil];
         return NO;
         
     }
