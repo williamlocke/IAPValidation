@@ -210,7 +210,7 @@ static const short _base64DecodingTable[256] = {
 
 /* Public domain code (but less efficient than above) from Cyrus at http://cocoadev.com/wiki/BaseSixtyFour */
 
-#define ArrayLength(x) (sizeof(x)/sizeof((x)))
+#define ArrayLength(x) (sizeof(x)/sizeof((x)[0]))
 
 static char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; static char decodingTable[128];
 
