@@ -11,7 +11,7 @@ iOS 5.x is required.  On iOS 4, all purchases will validate (just as if you were
 
 The iOS 5 requirement is only because of the use of NSJSONSerialization; patches to replace NSJSONSerialization with an iOS 4 compatibility implementation (in NSData+RRTransactionParsingAdditions) are welcome.
 
-The verification code tries first with the deployment verification servers, and retries with the sandbox if the returned error code indicates this is needed. Therefore, no changes are needed between debug and deployment buiilds.
+The verification code tries first with the deployment verification servers, and retries with the sandbox if the returned error code indicates this is needed. Therefore, no changes are needed between debug and deployment builds.
 
 Use
 --------
