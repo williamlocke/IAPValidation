@@ -11,6 +11,7 @@
 #import "NSData+RRTransactionParsingAdditions.h"
 
 #define IS_IOS6_AWARE (__IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1)
+#define REQUIRES_IOS6 (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_6_0)
 
 #if ! __has_feature(objc_arc)
 #warning This file must be compiled with ARC. Use -fobjc-arc flag (or convert project to ARC).
@@ -268,7 +269,9 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     // The receipt is valid, so checked the receipt specifics now.
     
     NSDictionary *verifiedReceiptReceiptDictionary  = [verifiedReceiptDictionary objectForKey:@"receipt"];
+#if ! REQUIRES_IOS6
     NSString *verifiedReceiptUniqueIdentifier       = [verifiedReceiptReceiptDictionary objectForKey:@"unique_identifier"];
+#endif
     //NSString *transactionIdFromVerifiedReceipt      = [verifiedReceiptReceiptDictionary objectForKey:@"transaction_id"];
     
     // Get the transaction's receipt data
@@ -328,6 +331,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
             }
         }
 #endif
+#if ! REQUIRES_IOS6
     } else {
         // Pre iOS 6 
 #pragma clang diagnostic push
@@ -343,6 +347,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
             // Comment this line out to test in the Simulator.
             failCount++;
         }        
+#endif
     }
     
     
