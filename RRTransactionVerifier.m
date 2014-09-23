@@ -249,7 +249,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     {
         return NO;
     }
-    int verifyReceiptStatus = [status integerValue];
+    NSInteger verifyReceiptStatus = [status integerValue];
     
     // 21007 = sandbox receipt tried to verify with production server
     if (21007 == verifyReceiptStatus) 
@@ -707,7 +707,7 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
     
     CC_SHA1_Init(&sha1_ctx);
     CC_SHA1_Update(&sha1_ctx, &signature_blob_ptr->version, sizeof(signature_blob_ptr->version));
-    CC_SHA1_Update(&sha1_ctx, purchase_info_bytes, purchase_info_length);
+    CC_SHA1_Update(&sha1_ctx, purchase_info_bytes, (CC_LONG)purchase_info_length);
     CC_SHA1_Final(to_be_verified_data, &sha1_ctx);
     
     SecKeyRef receipt_signing_key = SecTrustCopyPublicKey(trust);
