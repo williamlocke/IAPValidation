@@ -1,6 +1,8 @@
 iap_validation
 ================
 
+*** THIS CODE IS ONLY NEEDED IN iOS 5.x and PRIOR. The vulnerability was fixed in iOS 6. ***
+
 In July 2012, a Russian hacker identified a vulnerability in the In-App Purchase system and released it into the wild. Apple responded with TP40012484, "In-App Purchase Receipt Validation on iOS," which included VerificationController, a mostly-complete singleton class to perform validation.
 
 Apple's VerificationController requires making a number of changes within the code and  adding your own callbacks and base64 implementation. This small collection of classes is based on it and provides a simple delegate-based system to perform validation. 
