@@ -10,6 +10,12 @@
 #import "RRBase64Manager.h"
 #import "NSData+RRTransactionParsingAdditions.h"
 
+#include <CommonCrypto/CommonDigest.h>
+#include <Security/Security.h>
+#include <AssertMacros.h>
+
+
+
 #define IS_IOS6_AWARE (__IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_1)
 #define USE_UDID      0
 
@@ -331,16 +337,16 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
 #endif
     } else {
         // Pre iOS 6
-#if USE_UDID
-        NSString *localIdentifier           = [UIDevice currentDevice].uniqueIdentifier;
-#endif
+//#if USE_UDID
+//        NSString *localIdentifier           = [UIDevice currentDevice].uniqueIdentifier;
+//#endif
         NSString *purchaseInfoUniqueId      = [purchaseInfoFromTransaction objectForKey:@"unique-identifier"];
 		
         
         if (![purchaseInfoUniqueId isEqualToString:verifiedReceiptUniqueIdentifier]
-#if USE_UDID
-            || ![purchaseInfoUniqueId isEqualToString:localIdentifier]
-#endif
+//#if USE_UDID
+//            || ![purchaseInfoUniqueId isEqualToString:localIdentifier]
+//#endif
         ) {
             // Comment this line out to test in the Simulator.
             failCount++;
@@ -509,9 +515,6 @@ static BOOL checkReceiptSecurity(NSString *purchase_info_string, NSString *signa
 #pragma mark
 #pragma mark Check Receipt signature
 
-#include <CommonCrypto/CommonDigest.h>
-#include <Security/Security.h>
-#include <AssertMacros.h>
 unsigned int iTS_intermediate_der_len = 1039;
 
 unsigned char iTS_intermediate_der[] = {
